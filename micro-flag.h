@@ -285,7 +285,7 @@ MicroFlagError micro_flag_print_help(const char* prog_name,
     bool has_long = (flags[i].long_name != NULL);
     printf("    %s%s%-8s %-6s %s\n",
            flags[i].short_name,
-           (has_long || has_short) ? "," : "",
+           (has_long && has_short) ? "," : "",
            flags[i].long_name,
            micro_flag_type_str[flags[i].type],
            flags[i].description);
