@@ -1,0 +1,86 @@
+micro-flag.h
+-----------
+
+Header-only tiny C99 library to parse command line arguments.
+
+Author:  Giovanni Santini
+Mail:    giovanni.santini@proton.me
+License: MIT
+
+
+Usage
+-----
+
+Do this:
+
+  #define MICRO_FLAG_IMPLEMENTATION
+
+before you include the header in *one* C or C++ file to create the
+implementation.
+
+i.e. it should look like this:
+
+  #include ...
+  #include ...
+  #include ...
+  #define MICRO_FLAG_IMPLEMENTATION
+  #include "micro-flag.h"
+
+To use micro-flag.h, create first an array of MicroFlags, like so:
+
+```
+typedef struct {
+  bool show_help;
+  char* out_name;
+  char a_char;
+  int a_number;
+} Args;                   // This is just for convenience
+
+int main(int argc, char** argv)
+{
+  Args args;
+  // Default values
+  args.show_help = false;
+  args.out_name = "out";
+  args.a_char = 'A';
+  args.a_number = 0;
+
+ // Create an array of flags
+ MicroFlag flags[] =
+   {
+      { MICRO_FLAG_BOOL, &args.show_help, "-h",
+                         "--help", "show help message" },
+      { MICRO_FLAG_STR,  &args.out_name,  "-o",
+                         "--output", "set output file"   },
+      { MICRO_FLAG_CHAR, &args.a_char  ,  "-c",
+                         "--char",   "give me a char!"   },
+      { MICRO_FLAG_INT,  &args.a_number,  "-n",
+                         "--number", "print this number" },
+   };
+...
+```
+
+Now you can call `micro_flag_parse` which will set the variables
+with the parsed valued from the arguments:
+
+```
+if (micro_flag_parse(flags, num_flags, argc, argv) != MICRO_FLAG_OK)
+   return 1;
+```
+
+You can use `micro_flag_print_help` to print the help message:
+
+```
+
+if (args.show_help)
+{
+  micro_flag_print_help("example",
+                        "A sample application to showcase the library",
+                        flags,
+                        num_flags);
+   return 0;
+ }
+```
+
+Check out the full example at the end of the header.
+
