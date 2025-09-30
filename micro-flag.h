@@ -100,7 +100,6 @@
 //     https://github.com/San7o/micro-headers
 //
 
-
 #ifndef _MICRO_FLAG_H_
 #define _MICRO_FLAG_H_
 
@@ -207,8 +206,8 @@ MicroFlagError micro_flag_parse(MicroFlag *flags,
     bool found = false;
     for (unsigned int flag = 0; flag < num_flags; ++flag)
     {
-      if (strcmp(flags[flag].short_name, argv[i]) == 0
-          || strcmp(flags[flag].long_name, argv[i]) == 0)
+      if ((flags[flag].short_name && strcmp(flags[flag].short_name, argv[i]) == 0)
+          || (flags[flag].long_name && strcmp(flags[flag].long_name, argv[i]) == 0))
       {
         found = true;
         switch (flags[flag].type)
@@ -297,10 +296,10 @@ MicroFlagError micro_flag_print_help(const char* prog_name,
   {
     bool has_short = (flags[i].short_name != NULL);
     bool has_long = (flags[i].long_name != NULL);
-    printf("    %s%s%-8s %-6s %s\n",
-           flags[i].short_name,
+    printf("    %s%s%s %s\n        %s\n",
+           (has_short ? flags[i].short_name : ""),
            (has_long && has_short) ? "," : "",
-           flags[i].long_name,
+           (has_long ? flags[i].long_name : ""),
            micro_flag_type_str[flags[i].type],
            flags[i].description);
   }
