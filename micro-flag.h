@@ -59,6 +59,7 @@
 //       { MICRO_FLAG_INT,  &args.a_number,  "-n",
 //                          "--number", "print this number" },
 //    };
+//  size_t num_flags = sizeof(flags) / sizeof(flags[0]);
 // ...
 // ```
 //
@@ -120,9 +121,11 @@ typedef enum {
   MICRO_FLAG_ERROR_MISSING_CHAR,
   MICRO_FLAG_ERROR_MISSING_STR,
   MICRO_FLAG_ERROR_MISSING_INT,
+  MICRO_FLAG_ERROR_MISSING_DOUBLE,
   MICRO_FLAG_ERROR_CHAR_WRONG_ARG,
   MICRO_FLAG_ERROR_UNKNOWN_FLAG,
   MICRO_FLAG_ERROR_NOT_AN_INT,
+  MICRO_FLAG_ERROR_NOT_A_DOUBLE,
   _MICRO_FLAG_ERROR_MAX,
 } MicroFlagError;
 
@@ -131,6 +134,7 @@ typedef enum {
   MICRO_FLAG_CHAR,
   MICRO_FLAG_STR,
   MICRO_FLAG_INT,
+  MICRO_FLAG_DOUBLE,
   _MICRO_FLAG_MAX,
 } MicroFlagType;
 
@@ -194,7 +198,7 @@ extern const char* micro_flag_type_str[_MICRO_FLAG_MAX];
 #include <errno.h>
 #include <limits.h>
 
-const char *micro_flag_type_str[] = { "", "<char>", "<str>", "<int>" };
+const char *micro_flag_type_str[] = { "", "<char>", "<str>", "<int>", "<double>" };
 
 MicroFlagError micro_flag_parse(MicroFlag *flags,
                                 unsigned int num_flags,
@@ -204,6 +208,7 @@ MicroFlagError micro_flag_parse(MicroFlag *flags,
   for (int i = 1; i < argc; ++i)
   {
     bool found = false;
+    char *endptr;
     for (unsigned int flag = 0; flag < num_flags; ++flag)
     {
       if ((flags[flag].short_name && strcmp(flags[flag].short_name, argv[i]) == 0)
@@ -253,18 +258,38 @@ MicroFlagError micro_flag_parse(MicroFlag *flags,
             return MICRO_FLAG_ERROR_MISSING_INT;
           }
 
-          char *endptr;
           errno = 0;
-          long val = strtol(argv[i+1], &endptr, 10);
+          long val_int = strtol(argv[i+1], &endptr, 10);
           if (endptr == argv[i+1] || errno == ERANGE
-              || val > INT_MAX || val < INT_MIN)
+              || val_int > INT_MAX || val_int < INT_MIN)
           {
             printf("Usage: %s,%s <integer>\n",
                    flags[flag].short_name,
                    flags[flag].long_name);
             return MICRO_FLAG_ERROR_NOT_AN_INT;
           }
-          *((int*) flags[flag].value) = val;
+          *((int*) flags[flag].value) = val_int;
+          i++;
+          break;
+        case MICRO_FLAG_DOUBLE:
+          if (i + 1 >= argc)
+          {
+            printf("Usage: %s,%s <double>\n",
+                   flags[flag].short_name,
+                   flags[flag].long_name);
+            return MICRO_FLAG_ERROR_MISSING_DOUBLE;
+          }
+
+          errno = 0;
+          double val_double = strtod(argv[i+1], &endptr);
+          if (endptr == argv[i+1] || errno == ERANGE)
+          {
+            printf("Usage: %s,%s <double>\n",
+                   flags[flag].short_name,
+                   flags[flag].long_name);
+            return MICRO_FLAG_ERROR_NOT_A_DOUBLE;
+          }
+          *((double*) flags[flag].value) = val_double;
           i++;
           break;
         default:

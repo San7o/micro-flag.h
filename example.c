@@ -11,6 +11,7 @@ typedef struct {
   char* out_name;
   char a_char;
   int a_number;
+  double a_double;
 } Args;
 
 int main(int argc, char** argv)
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
   args.out_name = "out";
   args.a_char = 'A';
   args.a_number = 0;
+  args.a_double = 123.123;
   
   MicroFlag flags[] =
     {
@@ -28,6 +30,7 @@ int main(int argc, char** argv)
       { MICRO_FLAG_STR,  &args.out_name,  "-o", "--output", "set output file"   },
       { MICRO_FLAG_CHAR, &args.a_char  ,  "-c", "--char",   "give me a char!"   },
       { MICRO_FLAG_INT,  &args.a_number,  "-n", "--number", "print this number" },
+      { MICRO_FLAG_DOUBLE,  &args.a_double,  "-d", "--double", "print a double" },
     };
 
   size_t num_flags = sizeof(flags) / sizeof(flags[0]);
@@ -46,6 +49,7 @@ int main(int argc, char** argv)
   printf("Output file: %s\n", args.out_name);
   printf("A char:      %c\n", args.a_char);
   printf("A number:    %d\n", args.a_number);
+  printf("A double:    %f\n", args.a_double);
   
   return 0;
 }
